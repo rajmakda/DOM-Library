@@ -58,6 +58,34 @@ window.dome = (function() {
         }
     }
 
+    // This function is used to add one class or an array of classes to the elements
+    Dome.prototype.addClass = function(classes) {
+        var className = ""
+        if (typeof classes !== "string") {
+            for (var i=0;i<classes.length;i++) {
+                className += " " + classes[i]
+            }
+        } else {
+            className += " " + classes
+        }
+        return this.forEach(function(element) {
+            element.className += className
+        })
+    }
+
+    // This function will remove a class name from the elements. Only one class can be removed at a time. All instances of the class name will be removed.
+    Dome.prototype.removeClass = function (classToBeRemoved) {
+        return this.forEach(function(element) {
+            var classes = element.className
+            classes = classes.split(" ")
+            var i;
+            while((i = classes.indexOf(classToBeRemoved)) > -1) {
+                cs = cs.splice(0,i).concat(cs.splice(++i))
+            }
+            element.className = cs.join(" ")
+        })
+    }
+
     // Main library object
     var dome = {
 
