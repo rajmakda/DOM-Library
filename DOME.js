@@ -141,6 +141,52 @@ window.dome = (function() {
         })
     }
 
+    // Adding an event handler to the elements. Works with IE8 and before. Uses a closure and IIFE (Immediately invoking function expression)
+    Dome.prototype.on = (function() {
+        if(document.addEventListener) {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element.addEventListener(event, fn, false)
+                })
+            }
+        } else if (document.attachEvent) {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element.attachEvent("on"+event, fn)
+                })
+            }
+        } else {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element["on"+event] = fn
+                })
+            }
+        }
+    }())
+
+    // Removing an event listener for elements. Works with IE8 and before. Uses a closure and Immediately invoking function expression to check for browser compatibility
+    Dome.prototype.off = (function() {
+        if(document.removeEventListener) {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element.removeEventListener(event, fn, false)
+                })
+            }
+        } else if (document.detachEvent) {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element.detachEvent("on"+event, fn)
+                })
+            }
+        } else {
+            return function(event, fn) {
+                return this.forEach(function(element) {
+                    element["on"+event] = null
+                })
+            }
+        }
+    }())
+
     // Main library object
     var dome = {
 
