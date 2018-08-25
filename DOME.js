@@ -1,3 +1,15 @@
+// Function to fix a bug in IE 8 which does not support the Array.prototype.indexOf function
+if (typeof Array.prototype.indexOf !== "function") {
+    Array.prototype.indexOf = function(element) {
+        for (var i =0; i<this.length;i++) {
+            if(this[i] === element) {
+                return i
+            }
+        }
+        return -1
+    }
+}
+
 window.dome = (function() {
 
     // Contructor function for new instances of library
@@ -86,6 +98,49 @@ window.dome = (function() {
         })
     }
 
+    // This function adds attributes to an elements or returns the attributes of elements
+    Dome.prototype.attr = function(attr, value) {
+        if (typeof value !== "undefined") {
+            return this.forEach(function(element) {
+                element.setAttribute(attr, value)
+            })
+        } else {
+            return this.mapOne(function(element) {
+                return element.getAttribute(attr)
+            })
+        }
+    }
+
+    // Append an element. Append one or more new/existing elements to one or more existing elements. The argument elements has to be an instance of the DOME object
+    Dome.prototype.append = function(elements) {
+        return this.forEach(function(parentElement, i) {
+            elements.forEach(function(childElement) {
+                // Cloning/Copying node if appending to more than one existing element
+                if (i > 0) {
+                    childElement = childElement.cloneNode(true)
+                }
+                parentElement.appendChild(childElement)
+            })
+        })
+    }
+
+    // Prepend an element
+    Dome.prototype.prepend = function(elements) {
+        return this.forEach(function(parentElement,j) {
+            for(var i=elements.length-1;i>=0;i--) {
+                childElement = j > 0 ? elements[i].cloneNode(true) : elements[i]
+                parentElement.insertBefore(childElement,parentElement.firstChild)
+            }
+        })
+    }
+
+    // Removing elements from the DOM
+    Dome.prototype.remove = function() {
+        return this.forEach(function(element) {
+            return element.parentNode.removeChild(element)
+        })
+    }
+
     // Main library object
     var dome = {
 
@@ -103,6 +158,29 @@ window.dome = (function() {
                 elements = [selector];
             }
             return new Dome(elements);
+        },
+
+        // Create a new DOM element with a tagname and an attributes object containing key value pairs of the attributes to be added
+        create: function(tagName, attributes) {
+            var element = new Dome([document.createElement(tagName)])
+            // We delete the className and text so that we do not add them as attributes while looping through the other attribute keys
+            if (attributes) {
+                if(attributes.className) {
+                    element.addClass(attributes.className)
+                    delete attributes.className
+                }
+                if (attributes.text) {
+                    element.text(attributes.text)
+                    delete attributes.text
+                }
+                for (var key in attributes) {
+                    // This check is to ensure there are no properties inherited
+                    if(attributes.hasOwnProperty(key)) {
+                        element.attr(key, attributes[key])
+                    }
+                }
+            }
+            return element;
         }
     };
     return dome
